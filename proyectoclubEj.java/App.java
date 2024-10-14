@@ -1,18 +1,31 @@
-package app;
+package App;
 
-import app.config.DBConnection;
-import app.controller.ControllerInterface;
-import app.controller.LoginController;
+import App.Controllers.LoginController;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-public class App {
+@Setter
+@SpringBootApplication
+
+    public class AppClubApplication implements CommandLineRunner {
+    @Autowired
+    LoginController controller;
+    
 
     public static void main(String[] args) {
-        ControllerInterface controller = new LoginController();
+            SpringApplication.run(AppClubApplication.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
         try {
-            //DBConnection.getConnection();
             controller.session();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
+
 }

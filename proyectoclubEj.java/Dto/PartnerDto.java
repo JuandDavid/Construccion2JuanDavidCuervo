@@ -1,4 +1,4 @@
-package app.dto;
+package App.dto;
 
 import app.model.SubscriptionType;
 import java.sql.Timestamp;
@@ -67,9 +67,9 @@ public class PartnerDto {
         return "----------------------------------------------- \n"
                 + "* ID Socio: " + id + "\n"
                 + "* ID Usuario: " + userId.getId() + "\n"
-                + "* Fecha de afiliación: " + creationDate.toString() + "\n"
+                + "* Fecha de creacion: " + creationDate.toString() + "\n"
                 + "* Fondos Disponibles: " + amount + "\n"
-                + "* Tipo de suscripción: " + type.toString() + "\n"
+                + "* Tipo de suscripcion: " + type.toString() + "\n"
                 + "----------------------------------------------- \n";
     }
 }

@@ -1,27 +1,43 @@
-package app.controller;
+package App.Controller;
 
-import app.dto.UserDto;
-import app.model.Role;
-import app.service.Service;
 import java.util.HashMap;
 import java.util.Map;
+import app.Controller.Validator.UserValidator;
+import app.Dto.UserDto;
+import app.service.LoginService;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
-public class LoginController implements ControllerInterface{
-    private Service service;
-    private static final String MENU= "Ingrese una opcion: \n 1. Ingresar. \n 2. Salir. \n";
-    private Map<Role,ControllerInterface> roles;
+@Getter
+@NoArgsConstructor
+@Setter
+@Controller
 
-    public LoginController() {
-        this.service = new Service();
-        ControllerInterface adminController = new AdminController();
-        ControllerInterface partnerController = new PartnerController();
-        ControllerInterface guestController = new GuestController();
-        this.roles= new HashMap<Role,ControllerInterface>();
-        roles.put(Role.ADMIN, adminController);
-        roles.put(Role.PARTNER, partnerController);
-        roles.put(Role.GUEST, guestController);
+public class LoginController implements ControllerInterface {
+    @Autowired  
+    private UserValidator userValidator;    
+    @Autowired 
+    private LoginService loginService;
+    private static final String MENU = 
+        "Ingrese una opcion \n" +
+        "1. Iniciar sesion. \n" +
+        "2. Detener ejecución.";
+    private Map<String, ControllerInterface> roles; 
+
+        @Autowired
+     public  LoginController (AdminController adminController,MemberController memberController, GuestController guestController ) {
+        
+
+        this.roles = new HashMap<String, ControllerInterface>();
+        roles.put("ADMINISTRADOR", adminController);
+        roles.put("SOCIO", memberController);
+        roles.put("INVITADO", guestController);
     }
-    
+        
+
     @Override
     public void session() throws Exception {
         boolean session = true;
@@ -29,7 +45,7 @@ public class LoginController implements ControllerInterface{
             session = menu();
         }
     }
-    
+
     private boolean menu() {
         try {
             System.out.println(MENU);
@@ -40,42 +56,43 @@ public class LoginController implements ControllerInterface{
             return true;
         }
     }
-    
+
     private boolean options(String option) throws Exception {
         switch (option) {
             case "1": {
-                    this.login();
-                    return true;
+                this.login();
+                return true;
             }
             case "2": {
-                    System.out.println("Salir");;
-                    return false;
+                System.out.println("Programa detenido");
+                return false;
             }
             default: {
-                    System.out.println("Opcion no valida");
-                    return true;
+                System.out.println("Ingrese una opcion valida.");
+                return true;
             }
         }
     }
-	
-    private void login()throws Exception {
-        System.out.println("Ingrese Usuario");
-        String inputUserName= Utils.getReader().nextLine();
-        String userName = Utils.getValidator().isValidString("Usuario", inputUserName);
-        
-        System.out.println("Ingrese Contraseña");
-        String inputPassword= Utils.getReader().nextLine();
-        String password = Utils.getValidator().isValidString("Contraseña" ,inputPassword);
-        
+
+    private void login() throws Exception {
+        System.out.println("Ingrese nombre de usuario:");
+        String userName = Utils.getReader().nextLine();
+        userValidator.validateUserName(userName);
+
+        System.out.println("Ingrese contraseña:");
+        String password = Utils.getReader().nextLine();
+        userValidator.validatePassword(password); 
+
         UserDto userDto = new UserDto();
-        userDto.setPassword(password);
         userDto.setUserName(userName);
+        userDto.setPassword(password);
         
-        this.service.login(userDto);
-        if(roles.get(userDto.getRole())==null) {
+        this.loginService.login(userDto);
+
+        
+       if(this.roles.get(userDto.getRole()) == null) {
             throw new Exception ("Rol no valido");
         }
-        
-        roles.get(userDto.getRole()).session();
+        this.roles.get(userDto.getRole()).session();
     }
-}
+    }

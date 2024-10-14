@@ -1,131 +1,143 @@
-package app.dao;
+package App.Dao;
 
-import app.config.DBConnection;
-import app.dto.InvoiceDetailDto;
-import app.dto.InvoiceDto;
-import app.dto.PartnerDto;
-import app.model.Invoice;
-import app.model.InvoiceDetail;
-import app.model.InvoiceStatus;
-import app.model.Partner;
-import app.model.Person;
-import app.model.Role;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class InvoiceDao {
-    public List<InvoiceDto> getAllInvoices() throws Exception {
-        List<InvoiceDto> invoicesDto = new ArrayList<>();
-        String query = "SELECT ID,CREATIONDATE,AMOUNT,STATUS,PERSONID,PARTNERID FROM INVOICE";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Invoice invoice = new Invoice();
-            invoice.setId(resultSet.getLong("ID"));
-            invoice.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
-            invoice.setAmount(resultSet.getDouble("AMOUNT"));
-            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
-            Person person = new Person();
-            person.setId(resultSet.getLong("PERSONID"));
-            invoice.setPersonId(person);
-            Partner partner = new Partner();
-            partner.setId(resultSet.getLong("PARTNERID"));
-            invoice.setPartnerId(partner);
-            
-            invoicesDto.add(Helper.parse(invoice));
+import App.Dao.Repository.InvoiceRepository;
+import App.Dao.Interfaces.InvoiceDaoInterface;
+import App.Helper.Helper;
+
+import App.Model.Partner;
+import App.Model.Person;
+import App.Model.Invoice;
+
+import App.Dto.InvoiceDto;
+import App.Dto.PartnerDto;
+import App.Dto.PersonDto;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@LoginService
+
+public class InvoiceDao implements InvoiceDaoInterface {
+    @Autowired
+    InvoiceRepository invoiceRepository;
+
+    @Override
+    public double amountActiveInvoices(PersonDto personDto) throws Exception {
+        Person person = Helper.parse( personDto );
+        List<Invoice> invoiceList = (List<Invoice>) this.invoiceRepository.findByPersonId(person);
+        double amount = 0;
+        for (Invoice invoice : invoiceList) {
+            if(invoice.getStatus().equals("Pendiente")){
+                amount += invoice.getAmount();
+            }
         }
-        resultSet.close();
-        preparedStatement.close();
-        return invoicesDto;
+        return amount;
     }
-    
-    public List<InvoiceDto> getInvoicesByRole(Role role) throws Exception {
-        List<InvoiceDto> invoicesDto = new ArrayList<>();
-        String query = "SELECT I.ID,I.CREATIONDATE,I.AMOUNT,I.STATUS,I.PERSONID,I.PARTNERID FROM INVOICE I "
-                + "JOIN USER U ON I.PERSONID = U.PERSONNID "
-                + "WHERE U.ROLE = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, role.toString());
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Invoice invoice = new Invoice();
-            invoice.setId(resultSet.getLong("ID"));
-            invoice.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
-            invoice.setAmount(resultSet.getDouble("AMOUNT"));
-            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
-            Person person = new Person();
-            person.setId(resultSet.getLong("PERSONID"));
-            invoice.setPersonId(person);
-            Partner partner = new Partner();
-            partner.setId(resultSet.getLong("PARTNERID"));
-            invoice.setPartnerId(partner);
-            
-            invoicesDto.add(Helper.parse(invoice));
+
+    @Override
+    public double amountActiveInvoicesByPartner(PartnerDto partnerDto) throws Exception {
+        Partner partner = Helper.parse(partnerDto);
+        List<Invoice> invoiceList = this.invoiceRepository.findByPartnerId( partner );
+        double amount = 0;
+        for (Invoice invoice : invoiceList) {
+            if(invoice.getStatus().equals("Pendiente")){
+                amount += invoice.getAmount();
+            }
         }
-        resultSet.close();
-        preparedStatement.close();
-        return invoicesDto;
+        return amount;
     }
-    
-    public List<InvoiceDto> getPendingInvoicesByPartnerId(long partnerId) throws Exception {
-        List<InvoiceDto> invoicesDto = new ArrayList<>();
-        String query = "SELECT ID,CREATIONDATE,AMOUNT,STATUS,PERSONID,PARTNERID FROM INVOICE "
-                + "WHERE PARTNERID = ? AND STATUS = 'PENDING' ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1, partnerId);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Invoice invoice = new Invoice();
-            invoice.setId(resultSet.getLong("ID"));
-            invoice.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
-            invoice.setAmount(resultSet.getDouble("AMOUNT"));
-            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
-            Person person = new Person();
-            person.setId(resultSet.getLong("PERSONID"));
-            invoice.setPersonId(person);
-            Partner partner = new Partner();
-            partner.setId(resultSet.getLong("PARTNERID"));
-            invoice.setPartnerId(partner);
-            
-            invoicesDto.add(Helper.parse(invoice));
+
+    @Override
+    public double amountCancelInvoicesByPartner(PartnerDto partnerDto) throws Exception {
+        Partner partner = Helper.parse(partnerDto);
+        List<Invoice> invoiceList = this.invoiceRepository.findByPartnerId( partner );
+        double amount = 0;
+        for (Invoice invoice : invoiceList) {
+            if(invoice.getStatus().equals("Cancelada")){
+                amount += invoice.getAmount();
+            }
         }
-        resultSet.close();
-        preparedStatement.close();
-        return invoicesDto;
+        return amount;
+    }
+
+    @Override
+    public double amountTotalInvoicesByPartner(PartnerDto partnerDto) throws Exception {
+        Partner partner = Helper.parse(partnerDto);
+        List<Invoice> invoiceList = this.invoiceRepository.findByPartnerId( partner );
+        double amount = 0;
+        for (Invoice invoice : invoiceList) {
+            amount += invoice.getAmount();
+        }
+        return amount;
     }
     
-    public void deleteInvoicesByPartnerId(long partnerId) throws Exception {
-        String query = "DELETE FROM INVOICE WHERE PARTNERID = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1,partnerId);
-        preparedStatement.execute();
-        preparedStatement.close();
+    @Override
+    public void createInvoice( InvoiceDto invoiceDto ) throws Exception {
+        Invoice invoice = Helper.parse( invoiceDto );
+        invoice.setCreationDate( Timestamp.valueOf( LocalDateTime.now() ) );
+        this.invoiceRepository.save( invoice );
+        invoiceDto.setId( invoice.getId() );
+        invoiceDto.setCreationDate( invoice.getCreationDate() );
+    }
+
+    @Override
+    public void updateInvoiceAmount( InvoiceDto invoiceDto ) throws Exception {
+        Invoice invoice = Helper.parse( invoiceDto );
+        this.invoiceRepository.save( invoice );
+    }
+
+    @Override
+    public void deleteInvoice( InvoiceDto invoiceDto ) throws Exception {
+        Invoice invoice = Helper.parse( invoiceDto );
+        this.invoiceRepository.deleteById( invoice.getId() );
+    }
+
+    @Override
+    public void cancelInvoice( InvoiceDto invoiceDto ) throws Exception {
+        Invoice invoice = Helper.parse( invoiceDto );
+        invoice.setStatus("CANCELADA");
+        this.invoiceRepository.save( invoice );
     }
     
-    public void createInvoice(InvoiceDto invoiceDto) throws Exception {
-        Invoice invoice = Helper.parse(invoiceDto);
-        String query = "INSERT INTO INVOICE(AMOUNT,CREATIONDATE,PARTNERID,PERSONID,STATUS) VALUES (?,?,?,?,?) ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setDouble(1, invoice.getAmount());
-        preparedStatement.setTimestamp(2,invoice.getCreationDate());
-        preparedStatement.setLong(3, invoice.getPartnerId().getId());
-        preparedStatement.setLong(4, invoice.getPersonId().getId());
-        preparedStatement.setString(5, invoice.getStatus().toString());
-        preparedStatement.execute();
-        preparedStatement.close();
+    @Override
+    public ArrayList<InvoiceDto> listClubInvoices() throws Exception {
+        ArrayList<InvoiceDto> listInvoices = new ArrayList<InvoiceDto>();
+        List<Invoice> invoiceList = this.invoiceRepository.findAll();
+        for (Invoice invoice : invoiceList) {
+            listInvoices.add(Helper.parse(invoice));
+        }
+        return listInvoices;
     }
-    
-    public void createInvoiceDetail(InvoiceDetailDto invoiceDetailDto) throws Exception {
-        InvoiceDetail invoiceDetail = Helper.parse(invoiceDetailDto);
-        String query = "INSERT INTO INVOICEDETAIL(AMOUNT,DESCRIPTION,INVOICEID,ITEM) VALUES (?,?,?,?) ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setDouble(1, invoiceDetail.getAmount());
-        preparedStatement.setString(2,invoiceDetail.getDescription());
-        preparedStatement.setLong(3, invoiceDetail.getInvoiceId().getId());
-        preparedStatement.setInt(4, invoiceDetail.getItem());
-        preparedStatement.execute();
-        preparedStatement.close();
+
+    @Override
+    public ArrayList<InvoiceDto> listPartnerInvoices(PartnerDto partnerDto) throws Exception {
+        ArrayList<InvoiceDto> listInvoices = new ArrayList<InvoiceDto>();
+        Partner partner = Helper.parse(partnerDto);
+        List<Invoice> invoiceList = this.invoiceRepository.findByPartnerId( partner );
+        for (Invoice invoice : invoiceList) {
+            listInvoices.add(Helper.parse(invoice));
+        }
+        return listInvoices;
+    }
+
+    @Override
+    public ArrayList<InvoiceDto> listPersonInvoices(PersonDto personDto) throws Exception {
+        ArrayList<InvoiceDto> listInvoices = new ArrayList<InvoiceDto>();
+        Person person = Helper.parse(personDto);
+        List<Invoice> invoiceList = this.invoiceRepository.findByPersonId( person );
+        for (Invoice invoice : invoiceList) {
+            listInvoices.add(Helper.parse(invoice));
+        }
+        return listInvoices;
     }
 }

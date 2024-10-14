@@ -1,45 +1,20 @@
-package app.dto;
+package App.Dto;
 
-import app.model.GuestStatus;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
 
-public class GuestDto {
+import App.Dto.Interfaces.GuestDtoInterface;
+import App.Model.Partner;
+import App.Model.User;
+
+@Getter
+@Setter
+@NoArgsConstructor
+
+public class GuestDto implements GuestDtoInterface{
     private long id;
-    private UserDto userId;
-    private PartnerDto partnerId;
-    private GuestStatus status;
-
-    public GuestDto() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public UserDto getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UserDto userId) {
-        this.userId = userId;
-    }
-
-    public PartnerDto getPartnerId() {
-        return partnerId;
-    }
-
-    public void setPartnerId(PartnerDto partnerId) {
-        this.partnerId = partnerId;
-    }
-
-    public GuestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(GuestStatus status) {
-        this.status = status;
-    }
+    private User userId;
+    private Partner partnerId;
+    private String status;
 }

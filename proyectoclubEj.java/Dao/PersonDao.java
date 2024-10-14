@@ -1,66 +1,63 @@
-package app.dao;
+package App.Dao;
 
-import app.config.DBConnection;
-import app.dto.PersonDto;
-import app.model.Person;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Collections;
+import App.Dto.PersonDto;
+import App.Helper.Helper;
+import App.Model.Person;
+import App.Dao.Interfaces.PersonDaoInterface;
+import App.Dao.Repository.PersonRepository;
+import App.Dto.InvoiceDto;
+import App.Dto.UserDto;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class PersonDao {
-    public boolean existsByDocument(PersonDto personDto) throws Exception {
-        String query = "SELECT 1 FROM PERSON WHERE DOCUMENT = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1, personDto.getDocument());
-        ResultSet resulSet = preparedStatement.executeQuery();
-        boolean exists = resulSet.next();
-        resulSet.close();
-        preparedStatement.close();
-        return exists;
+@Getter
+@NoArgsConstructor
+@Setter
+@Service
+
+public class PersonDao implements PersonDaoInterface{
+    @Autowired
+    PersonRepository personRepository;
+
+    @Override
+    public boolean existsByDocument( PersonDto personDto ) throws Exception {
+        Person person = Helper.parse( personDto );
+        return this.personRepository.existsByDocument( person.getDocument() );
     }
 
+    @Override
     public void createPerson(PersonDto personDto) throws Exception {
         Person person = Helper.parse(personDto);
-        String query = "INSERT INTO PERSON(NAME,DOCUMENT,CELLPHONE) VALUES (?,?,?) ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, person.getName());
-        preparedStatement.setLong(2,person.getDocument());
-        preparedStatement.setLong(3, person.getCellPhone());
-        preparedStatement.execute();
-        preparedStatement.close();
+        this.personRepository.save( person );
     }
 
-    public void deletePerson(long[] ids) throws Exception {
-        if (ids == null || ids.length == 0) {
-            throw new Exception("Error en la lista de IDS.");
-        }
-        String placeholders = String.join(",", Collections.nCopies(ids.length, "?"));
-        String query = "DELETE FROM PERSON WHERE ID IN (" + placeholders + ")";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        for (int i = 0; i < ids.length; i++) {
-            preparedStatement.setLong(i + 1, ids[i]);
-        }
-        preparedStatement.execute();
-        preparedStatement.close();	
+    @Override
+    public void deletePerson(PersonDto personDto) throws Exception {
+        Person person = Helper.parse(personDto);
+        this.personRepository.deleteById( person.getId() );
     }
 
-    public PersonDto findByDocument(PersonDto personDto) throws Exception {
-        String query = "SELECT ID,NAME,DOCUMENT,CELLPHONE FROM PERSON WHERE DOCUMENT = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1, personDto.getDocument());
-        ResultSet resulSet = preparedStatement.executeQuery();
-        if (resulSet.next()) {
-            Person person = new Person();
-            person.setId(resulSet.getLong("ID"));
-            person.setName(resulSet.getString("NAME"));
-            person.setDocument(resulSet.getLong("DOCUMENT"));
-            person.setCellPhone(resulSet.getLong("CELLPHONE"));
-            resulSet.close();
-            preparedStatement.close();
-            return Helper.parse(person);
-        }
-        resulSet.close();
-        preparedStatement.close();
-        return null;
+    @Override
+    public PersonDto findByDocument( PersonDto personDto ) throws Exception {
+        return Helper.parse( this.personRepository.findByDocument( personDto.getDocument() ) );
+    }
+
+    @Override
+    public PersonDto findByUserId( UserDto userDto ) throws Exception {
+        return Helper.parse( this.personRepository.findById( userDto.getPersonnId().getId() ) );
+    }
+
+    @Override
+    public PersonDto findByPersonId( InvoiceDto invoiceDto ) throws Exception {
+        return Helper.parse( this.personRepository.findById( invoiceDto.getPersonId().getId() ) );
+    }
+
+    @Override
+    public void updatePerson(PersonDto personDto) throws Exception {
+        Person person = Helper.parse( personDto );
+        this.personRepository.save( person );
     }
 }

@@ -1,52 +1,41 @@
-package app.model;
+package App.Model;
 
-public class InvoiceDetail {
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@NoArgsConstructor
+@Setter
+
+@Entity
+@Table (name = "InvoiceDetail")
+
+    public class InvoiceDetail{
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column (name = "Id")
+
     private long id;
+    @JoinColumn (name = "InvoiceId")
+    @ManyToOne
+    
     private Invoice invoiceId;
+    @Column (name = "Item")
+    
     private int item;
+    @Column (name = "Description")
+
     private String description;
+    @Column (name = "Amount")
+
     private double amount;
-
-    public InvoiceDetail() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Invoice getInvoiceId() {
-        return invoiceId;
-    }
-
-    public void setInvoiceId(Invoice invoiceId) {
-        this.invoiceId = invoiceId;
-    }
-
-    public int getItem() {
-        return item;
-    }
-
-    public void setItem(int item) {
-        this.item = item;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
 }

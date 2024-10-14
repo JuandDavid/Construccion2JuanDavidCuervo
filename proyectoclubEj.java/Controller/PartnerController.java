@@ -1,35 +1,45 @@
-package app.controller;
+package App.Controller;
 
-import app.dto.GuestDto;
-import app.dto.InvoiceDetailDto;
-import app.dto.InvoiceDto;
-import app.dto.PartnerDto;
-import app.dto.PersonDto;
-import app.dto.UserDto;
-import app.model.GuestStatus;
-import app.model.InvoiceStatus;
-import app.model.Role;
-import app.model.SubscriptionType;
-import app.service.Service;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.List;
+import App.Dao.PartnerDao;
+import App.Dto.PartnerDto;
 
+import App.Service.LoginService;
+import App.Service.UserService;
+import App.Service.PartnerService;
+import App.Service.GuestService;
+import App.Service.InvoiceService;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Getter
+@NoArgsConstructor
+@Setter
+@Controller
 public class PartnerController implements ControllerInterface{
-    private Service service;
-    private static final String MENU = "Ingrese una opcion: \n 1. Crear Invitado. "
-            + "\n 2. Activar Usuario "
-            + "\n 3. Desactivar Usuario "
-            + "\n 4. Registrar consumo "
-            + "\n 5. Recargar fondos "
-            + "\n 6. Eliminar usuario "
-            + "\n 7. Promover usuario a VIP \n"
-            + "\n 8. Salir \n";
+    private static final String MENU = "Ingrese una opcion \n "
+            + "1. Solicitar consumo \n "
+            + "2. Ver historial de consumos \n "
+            + "3. Crear Invitado \n "
+            + "4. Eliminar Invitado \n "
+            + "5. Cambio a VIP \n "
+            + "6. Cambiar PASSWORD \n "
+            + "9. Para cerrar sesion \n";
 
-    public PartnerController(){
-        this.service = new Service();
-    }
-  
+    @Autowired
+    private final PartnerDaoInterface partnerDao = new PartnerDaoInterface();
+    
+    @Autowired
+    private final UserService userService = new UserService();
+    @Autowired
+    private final PartnerService partnerService = new PartnerService();
+    @Autowired
+    private final InvoiceService invoiceService = new InvoiceService();
+    @Autowired
+    private final GuestService guestService = new GuestService();
+    
     
     @Override
     public void session() throws Exception {
@@ -41,53 +51,48 @@ public class PartnerController implements ControllerInterface{
     
     private boolean menu() {
         try {
-            System.out.println("Bienvenido");
+            System.out.println("Bienvenido " + LoginService.user.getUserName());
             System.out.print(MENU);
             String option = Utils.getReader().nextLine();
             return options(option);
-        } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return true;
+
+        } catch ( Exception e ) {
+            System.out.println(e.getMessage());
+            return true;
         }
     }
-    
+
     private boolean options(String option) throws Exception{
         switch (option) {
             case "1": {
-                System.out.println("Crear Invitado");
-                this.createGuest();
+                PartnerDto partnerDto = this.partnerDao.findByUserId( LoginService.user );
+                this.invoiceService.createPartnerInvoice( partnerDto );
                 return true;
             }
             case "2": {
-                System.out.println("Activar Usuario"); 
+                PartnerDto partnerDto = this.partnerDao.findByUserId( LoginService.user );
+                this.invoiceService.historyPartnerInvoice( partnerDto );
                 return true;
             }
             case "3": {
-                System.out.println("Desactivar Usuario"); 
+                this.guestService.createGuest( LoginService.user );
                 return true;
             }
             case "4": {
-                System.out.println("Registrar Consumo");
-                this.newService();
+                this.guestService.deleteGuest();
                 return true;
             }
             case "5": {
-                System.out.println("Recargar Fondos");
-                this.increaseAmount();
+                PartnerDto partnerDto = this.partnerDao.findByUserId( LoginService.user );
+                this.partnerService.updatePartnerType( partnerDto );
                 return true;
             }
             case "6": {
-                System.out.println("Eliminar Usuario");
-                this.cancelSubscription();
+                this.userService.changeUserPassword( LoginService.user );
                 return true;
             }
-            case "7": {
-                System.out.println("Promover Usuario a VIP");
-                this.requestVIPUpgrade();
-                return true;
-            }
-            case "8": {
-                System.out.println("Sesion Terminada");
+            case "9": {
+                System.out.println("Se ha cerrado sesion");
                 return false;
             }
             default: {
@@ -96,124 +101,5 @@ public class PartnerController implements ControllerInterface{
             }
         }
     }
-    
-    private void createGuest() throws Exception{
-        System.out.println("Ingrese Numero De Documento: ");
-        String inputDocument = Utils.getReader().nextLine();
-        Long document = Utils.getValidator().isValidLong("Documento", inputDocument);
-        
-        System.out.println("Nombre: ");
-        String inputName = Utils.getReader().nextLine();
-        String name = Utils.getValidator().isValidString("Nombre", inputName);
-        
-        System.out.println("Numero Celular: ");
-        String inputCellphone = Utils.getReader().nextLine();
-        Long cellphone = Utils.getValidator().isValidLong("Celular", inputCellphone);
-        
-        System.out.println("Nombre De Usuario: ");
-        String inputUserName = Utils.getReader().nextLine();
-        String userName = Utils.getValidator().isValidString("Nombre de Usuario", inputUserName);
-        
-        System.out.println("Ingrese una contraseña: ");
-        String inputPassword = Utils.getReader().nextLine();
-        String password = Utils.getValidator().isValidString("Contraseña", inputPassword);
-        
-        PersonDto personDto = new PersonDto();
-        personDto.setDocument(document);
-        personDto.setName(name);
-        personDto.setCellPhone(cellphone);
-        
-        UserDto userDto = new UserDto();
-        userDto.setPersonId(personDto);
-        userDto.setUserName(userName);
-        userDto.setPassword(password);
-        userDto.setRole(Role.GUEST);
-        
-        PartnerDto currentPartner = this.service.getCurrentPartner();
-        
-        GuestDto guestDto = new GuestDto();
-        guestDto.setUserId(userDto);
-        guestDto.setPartnerId(currentPartner);
-        guestDto.setStatus(GuestStatus.INACTIVE);
-        
-        this.service.createGuest(guestDto);
-    }
-    
-    private void increaseAmount() throws Exception {
-        PartnerDto currentPartner = this.service.getCurrentPartner();
-        final double maxAmountVIP = 5000000;
-        final double maxAmountRegular = 1000000;
-        
-        System.out.println("Valor a recargar: ");
-        String inputAddAmount = Utils.getReader().nextLine();
-        Double addAmount = Utils.getValidator().isValidDouble("Fondos adicionales", inputAddAmount);
-        
-        double newAmount = currentPartner.getAmount() + addAmount;
-        if((currentPartner.getType() == SubscriptionType.VIP && newAmount > maxAmountVIP) || 
-            (currentPartner.getType() != SubscriptionType.VIP && newAmount > maxAmountRegular)){
-            throw new Exception("Nuevo saldo supera el máximo permitido \n"
-                + "- VIP: " + maxAmountVIP + "\n"
-                + "- REGULARES: " + maxAmountRegular + "\n");
-        }
-        currentPartner.setAmount(newAmount);
-        
-        this.service.updatePartner(currentPartner);
-        System.out.println("Saldo Actualizado");
-    }
-    
-    private void requestVIPUpgrade() throws Exception {
-        PartnerDto currentPartner = this.service.getCurrentPartner();
-        currentPartner.setType(SubscriptionType.PENDING_VIP);
-        this.service.updatePartner(currentPartner);
-        System.out.println("Solicitudcreada exitosamente.");
-    }
-    
-    private void cancelSubscription() throws Exception {
-        List<InvoiceDto> partnerInvoices = this.service.getPendingInvoicesByCurrentPartnerId();
-        if(partnerInvoices.size() > 0){
-            throw new Exception("Cancele facturas pendientes e intente nuevamente \n");
-        }
-        System.out.println("Factura Eliminada");
-        this.service.deleteInvoicesByCurrentPartnerId();
-        
-        System.out.println("Invitado Eliminado");
-        this.service.deleteGuestsByCurrentPartnerId();
-        
-        System.out.println("Datos Eliminados");
-        this.service.deleteCurrentPartner();
-    }
-    
-    private void newService() throws Exception {
-        System.out.println("Descripcion del producto: ");
-        String inputDesc = Utils.getReader().nextLine();
-        String desc = Utils.getValidator().isValidString("Descripción", inputDesc);
-        
-        System.out.println("Valor del producto: ");
-        String inputAmount = Utils.getReader().nextLine();
-        double amount = Utils.getValidator().isValidDouble("Precio", inputAmount);
-        
-        System.out.println("Ingrese cantidad del producto: ");
-        String inputItem = Utils.getReader().nextLine();
-        int item = Utils.getValidator().isValidInteger("Cantidad", inputItem);
-        
-        InvoiceDetailDto invoiceDetailDto = new InvoiceDetailDto();
-        invoiceDetailDto.setAmount(amount);
-        invoiceDetailDto.setDescription(desc);
-        invoiceDetailDto.setItem(item);
-        
-        double totalInvoice = amount * item;
-        Calendar calendar = Calendar.getInstance();
-        Timestamp creationDate = new Timestamp(calendar.getTimeInMillis());
-        PartnerDto currentPartner = this.service.getCurrentPartner();
-        
-        InvoiceDto invoiceDto = new InvoiceDto();
-        invoiceDto.setAmount(totalInvoice);
-        invoiceDto.setCreationDate(creationDate);
-        invoiceDto.setStatus(InvoiceStatus.PENDING);
-        invoiceDto.setPartnerId(currentPartner);
-        
-        invoiceDetailDto.setInvoiceId(invoiceDto);
-        
-        this.service.createInvoice(invoiceDetailDto);
-    }
+
 }

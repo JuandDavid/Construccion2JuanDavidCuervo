@@ -1,43 +1,50 @@
-package app.dto;
+package App.Dto;
 
-public class PersonDto {
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import App.Controllers.Utils;
+import App.Controllers.Validator.PersonValidator;
+import App.Dto.Interfaces.PersonDtoInterface;
+
+@Getter
+@Setter
+@NoArgsConstructor
+
+public class PersonDto implements PersonDtoInterface{
     private long id;
     private long document;
     private String name;
-    private long cellPhone;
+    private long cellphone;
 
-    public PersonDto() {
+    private final PersonValidator personValidator = new PersonValidator();
+    
+    @Override
+    public void getPersonNameDto() throws Exception {
+        System.out.println("Ingrese nombre de la persona");
+        String personNameDto = Utils.getReader().nextLine();
+        this.personValidator.validName( personNameDto );
+        this.name = personNameDto;
     }
 
-    public long getId() {
-        return id;
+    @Override
+    public void getPersonCellNumberDto() throws Exception {
+        System.out.println("Ingrese numero de celular");
+        String personCellNumberDto = Utils.getReader().nextLine();
+        this.cellphone = personValidator.validCellPhone( personCellNumberDto );
     }
 
-    public void setId(long id) {
-        this.id = id;
+    @Override
+    public void getPersonDocumentDto() throws Exception {
+        System.out.println("Ingrese documento de identidad");
+        String personDocumentDto = Utils.getReader().nextLine();
+        this.document = personValidator.validDocument( personDocumentDto );
     }
-
-    public long getDocument() {
-        return document;
-    }
-
-    public void setDocument(long document) {
-        this.document = document;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getCellPhone() {
-        return cellPhone;
-    }
-
-    public void setCellPhone(long cellPhone) {
-        this.cellPhone = cellPhone;
+    
+    @Override
+    public void getPersonDocumentDto( String message ) throws Exception {
+        System.out.println (message);
+        String personDocumentDto = Utils.getReader().nextLine();
+        this.document = personValidator.validDocument( personDocumentDto );
     }
 }

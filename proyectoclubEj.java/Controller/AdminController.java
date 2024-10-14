@@ -1,32 +1,37 @@
-package app.controller;
+package App.Controller;
 
-import app.dto.InvoiceDto;
-import app.dto.PartnerDto;
-import app.dto.PersonDto;
-import app.dto.UserDto;
-import app.model.Role;
-import app.model.SubscriptionType;
-import app.service.Service;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.List;
+import App.Service.LoginService;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Getter
+@NoArgsConstructor
+@Setter
+@Controller
 
 public class AdminController implements ControllerInterface{
-    private Service service;
-    private static final String MENU = "Ingrese una opcion: \n 1. Crear socio "
-            + "\n 2. Registro de facturas Club \n"
-            + "\n 3. Registro de facturas Socio \n"
-            + "\n 4. Registro de facturas Invitado \n"
-            + "\n 5. Cambiar estado a VIP \n"
-            + "\n 6. Salir ";
-
-    public AdminController(){
-        this.service = new Service();
-    }
-  
+    private static final String MENU = "Ingrese una opcion \n "
+            + "1. Personas \n "
+            + "2. Usuarios \n "
+            + "3. Socios \n "
+            + "4. Invitados \n "
+            + "5. Procesos \n "
+            + "9. Cerrar sesion \n";
     
+    @Autowired
+    public ControllerInterface adminPersonController = new AdminPersonController();
+    @Autowired
+    public ControllerInterface adminUserController = new AdminUserController();
+    @Autowired
+    public ControllerInterface adminPartnerController = new AdminPartnerController();
+    @Autowired
+    public ControllerInterface adminGuestController = new AdminGuestController();
+    @Autowired
+    public ControllerInterface adminProcessesController = new AdminProcessesController();
+
     @Override
     public void session() throws Exception {
         boolean session = true;
@@ -37,154 +42,48 @@ public class AdminController implements ControllerInterface{
     
     private boolean menu() {
         try {
-            System.out.println("Bienvenido");
+            System.out.println("Bienvenido " + LoginService.user.getUserName());
             System.out.print(MENU);
             String option = Utils.getReader().nextLine();
             return options(option);
-        } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return true;
+
+        } catch ( Exception e ) {
+            System.out.println(e.getMessage());
+            return true;
         }
     }
-    
+
     private boolean options(String option) throws Exception{
         switch (option) {
             case "1": {
-                    System.out.println("Crear Socio");
-                    this.createPartner();
-                    return true;
+                this.adminPersonController.session();
+                return true;
             }
             case "2": {
-                    System.out.println("Registro de facturas Club");
-                    this.invoicesHistory();
-                    return true;
+                this.adminUserController.session();
+                return true;
             }
             case "3": {
-                    System.out.println("Registro de facturas Socio");
-                    this.invoicesHistoryByRole(Role.PARTNER);
-                    return true;
+                this.adminPartnerController.session();
+                return true;
             }
             case "4": {
-                    System.out.println("Registro de facturas Invitado");
-                    this.invoicesHistoryByRole(Role.GUEST);
-                    return true;
+                this.adminGuestController.session();
+                return true;
             }
             case "5": {
-                    System.out.println("Cambiar estado a VIP");
-                    this.upgradePartner();
-                    return true;
+                this.adminProcessesController.session();
+                return true;
             }
-            case "6": {
-                    System.out.println("Se ha cerrado sesión.\n");
-                    return false;
+            case "9": {
+                System.out.println("Sesion finalizada");
+                return false;
             }
             default: {
-                    System.out.println("Opción ingresada no válida.\n");
-                    return true;
+                System.out.println("Ingrese una opcion valida");
+                return true;
             }
         }
     }
-    
-    
-    private void createPartner() throws Exception{
-        System.out.println("Ingrese el documento de la persona: ");
-        String inputDocument = Utils.getReader().nextLine();
-        Long document = Utils.getValidator().isValidLong("Documento", inputDocument);
-        
-        System.out.println("Ingrese nombre: ");
-        String inputName = Utils.getReader().nextLine();
-        String name = Utils.getValidator().isValidString("Nombre", inputName);
-        
-        System.out.println("Ingrese numero celular: ");
-        String inputCellphone = Utils.getReader().nextLine();
-        Long cellphone = Utils.getValidator().isValidLong("Celular", inputCellphone);
-        
-        System.out.println("Ingrese nombre de usuario: ");
-        String inputUserName = Utils.getReader().nextLine();
-        String userName = Utils.getValidator().isValidString("Nombre de Usuario", inputUserName);
-        
-        System.out.println("Ingrese contraseña: ");
-        String inputPassword = Utils.getReader().nextLine();
-        String password = Utils.getValidator().isValidString("Contraseña", inputPassword);
-        
-        PersonDto personDto = new PersonDto();
-        personDto.setDocument(document);
-        personDto.setName(name);
-        personDto.setCellPhone(cellphone);
-        
-        UserDto userDto = new UserDto();
-        userDto.setPersonId(personDto);
-        userDto.setUserName(userName);
-        userDto.setPassword(password);
-        userDto.setRole(Role.PARTNER);
-        
-        PartnerDto partnerDto = new PartnerDto();
-        partnerDto.setAmount(50000);
-        partnerDto.setType(SubscriptionType.REGULAR);
-        
-        Calendar calendar = Calendar.getInstance();
-        Timestamp creationDate = new Timestamp(calendar.getTimeInMillis());
-        partnerDto.setCreationDate(creationDate);
-        partnerDto.setUserId(userDto);
-        
-        this.service.createPartner(partnerDto);
-    }
-    
-    private void invoicesHistory() throws Exception{
-        List<InvoiceDto> invoicesDto = this.service.getAllInvoices();
-        if(invoicesDto.size() < 1){
-            System.out.println("Datos no encontrados");
-            return;
-        }
-        for(InvoiceDto invoiceDto : invoicesDto){
-            System.out.println(invoiceDto.toString());
-        }
-    }
-    
-    private void invoicesHistoryByRole(Role role) throws Exception{
-        List<InvoiceDto> invoicesDto = this.service.getInvoicesByRole(role);
-        if(invoicesDto.size() < 1){
-            System.out.println("Datos no encontrados");
-            return;
-        }
-        for(InvoiceDto invoiceDto : invoicesDto){
-            System.out.println(invoiceDto.toString());
-        }
-    }
-    
-    private void upgradePartner() throws Exception{
-        List<PartnerDto> partnersDtoPending = this.service.getPartnersByType(SubscriptionType.PENDING_VIP);
-        List<PartnerDto> partnersDtoVIP = this.service.getPartnersByType(SubscriptionType.VIP);
-        
-        int maxVIP = 5;
-        int VIPCurrent = partnersDtoVIP.size();
-        int pending = partnersDtoPending.size();
-        int available = maxVIP - VIPCurrent;
-        
-        if(pending < 1){
-            throw new Exception("No hay solicitudes pendientes.");
-        }
-        if(available <= 0){
-            throw new Exception("Límite máximo de clientes VIP");
-        }
-        
-        System.out.println("Solicitudes pendientes: ");
-        for(PartnerDto partnerDto : partnersDtoPending){
-            System.out.println(partnerDto.toString());
-        }
-        
-        partnersDtoPending.sort(Comparator.comparingDouble(PartnerDto::getTotalInvoicesAmountPaid).reversed()
-            .thenComparingDouble(PartnerDto::getAmount).reversed()
-            .thenComparing(PartnerDto::getCreationDate));
-        
-        for (int i=0; i<available && i<pending; i++){
-            PartnerDto selectedPartner = partnersDtoPending.get(i);
-            System.out.println("Nuevo socio VIP ");
-            System.out.println(selectedPartner.toString());
 
-            selectedPartner.setType(SubscriptionType.VIP);
-            this.service.updatePartner(selectedPartner);
-            System.out.println("Actualizado exitosamente a VIP \n");   
-        }
-    }
 }

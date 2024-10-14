@@ -1,43 +1,34 @@
-package app.model;
+package App.Model;
 
-public class Person {
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@Getter
+@Setter
+
+@Entity
+@Table (name = "Person")
+    public class Person {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column (name = "Id")
+
     private long id;
+    @Column (name = "Document")
+
     private long document;
+    @Column (name = "Name")
+
     private String name;
-    private long cellPhone;
+    @Column (name = "Cellphone")
 
-    public Person() {
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getDocument() {
-        return document;
-    }
-
-    public void setDocument(long document) {
-        this.document = document;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public long getCellPhone() {
-        return cellPhone;
-    }
-
-    public void setCellPhone(long cellPhone) {
-        this.cellPhone = cellPhone;
-    }
+    private long cellphone;
 }

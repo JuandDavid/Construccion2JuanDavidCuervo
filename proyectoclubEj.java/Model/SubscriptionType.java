@@ -1,4 +1,4 @@
-package app.model;
+package App.model;
 
 public enum SubscriptionType {
     REGULAR,

@@ -1,54 +1,41 @@
-package app.model;
+package App.Model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public class Partner {
+@Getter
+@NoArgsConstructor
+@Setter
+
+@Entity
+@Table (name = "Partner")
+    public class Partner {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column (name = "Id")
+
     private long id;
+    @JoinColumn (name = "Userid")
+    @OneToOne
+
     private User userId;
+    @Column (name = "Amount")
+
     private double amount;
-    private SubscriptionType type;
-    private Timestamp creationDate;
+    @Column (name = "Type")
 
-    public Partner() {
-    }
+    private String type;
+    @Column (name = "CreationDate")
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public User getUserId() {
-        return userId;
-    }
-
-    public void setUserId(User userId) {
-        this.userId = userId;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public SubscriptionType getType() {
-        return type;
-    }
-
-    public void setType(SubscriptionType type) {
-        this.type = type;
-    }
-
-    public Timestamp getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Timestamp creationDate) {
-        this.creationDate = creationDate;
-    }
+    private Timestamp creationDate;  
 }

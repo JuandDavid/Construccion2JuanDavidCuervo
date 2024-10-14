@@ -1,72 +1,76 @@
-package app.dao;
+package App.Dao;
 
-import app.config.DBConnection;
-import app.dto.UserDto;
-import app.model.Person;
-import app.model.User;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import app.model.Role;
-import java.util.Collections;
+import App.Dao.Interfaces.UserDaoInteface;
+import App.Dao.Repository.UserRepository;
+import App.Dto.GuestDto;
+import App.Dto.PartnerDto;
 
-public class UserDao {
-    public UserDto findByUserName(UserDto userDto) throws Exception {
-        String query = "SELECT ID,USERNAME,PASSWORD,ROLE,PERSONNID FROM USER WHERE USERNAME = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, userDto.getUserName());
-        ResultSet resulSet = preparedStatement.executeQuery();
-        if (resulSet.next()) {
-            User user = new User();
-            user.setId(resulSet.getLong("ID"));
-            user.setUserName(resulSet.getString("USERNAME"));
-            user.setPassword(resulSet.getString("PASSWORD"));;
-            user.setRole(Role.valueOf(resulSet.getString("ROLE")));
-            Person person = new Person();
-            person.setDocument(resulSet.getLong("PERSONNID"));
-            user.setPersonId(person);
-            resulSet.close();
-            preparedStatement.close();
-            return Helper.parse(user);
-        }
-        resulSet.close();
-        preparedStatement.close();
-        return null;
+import App.Dto.PersonDto;
+import App.Model.User;
+import App.Dto.UserDto;
+import App.Helper.Helper;
+import App.Model.Person;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Getter
+@NoArgsConstructor
+@Setter
+@Service
+
+public class UserDao implements UserDaoInteface {
+    @Autowired
+    UserRepository userRepository;
+
+    @Override
+    public UserDto findByUserName( UserDto userDto ) throws Exception {
+        User user = this.userRepository.findByUserName(userDto.getUserName());
+        return Helper.parse( user );
     }
-    
+
+    @Override
+    public UserDto findByPersonId( PersonDto personDto ) throws Exception {
+        Person person = Helper.parse( personDto );
+        User user = this.userRepository.findByPersonnId( person );
+        return Helper.parse( user );
+    }
+
+    @Override
+    public UserDto findByUserId( PartnerDto partnerDto ) throws Exception {
+        User user = this.userRepository.findById( partnerDto.getUserId().getId() );
+        return Helper.parse( user );
+    }
+
+    @Override
+    public UserDto findByGuestUserId( GuestDto guestDto ) throws Exception {
+        User user = this.userRepository.findById( guestDto.getUserId().getId() );
+        return Helper.parse( user );
+    }
+
+    @Override
     public boolean existsByUserName(UserDto userDto) throws Exception {
-        String query = "SELECT 1 FROM USER WHERE USERNAME = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, userDto.getUserName());
-        ResultSet resulSet = preparedStatement.executeQuery();
-        boolean exists = resulSet.next();
-        resulSet.close();
-        preparedStatement.close();
-        return exists;
+        return this.userRepository.existsByUserName( userDto.getUserName() );
     }
-    
+
+    @Override
     public void createUser(UserDto userDto) throws Exception {
         User user = Helper.parse(userDto);
-        String query = "INSERT INTO USER(USERNAME,PASSWORD,PERSONNID,ROLE) VALUES (?,?,?,?) ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, user.getUserName());
-        preparedStatement.setString(2, user.getPassword());
-        preparedStatement.setLong(3,user.getPersonId().getId());
-        preparedStatement.setString(4, user.getRole().toString());
-        preparedStatement.execute();
-        preparedStatement.close();
+        this.userRepository.save( user );
+        userDto.setId( user.getId() );
     }
     
-    public void deleteUser(long[] ids) throws Exception {
-        if (ids == null || ids.length == 0) {
-            throw new Exception("Error en la lista de IDS.");
-        }
-        String placeholders = String.join(",", Collections.nCopies(ids.length, "?"));
-        String query = "DELETE FROM USER WHERE ID IN (" + placeholders + ")";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        for (int i = 0; i < ids.length; i++) {
-            preparedStatement.setLong(i + 1, ids[i]);
-        }
-        preparedStatement.execute();
-        preparedStatement.close();	
+    @Override
+    public void updateUser(UserDto userDto) throws Exception {
+        User user = Helper.parse(userDto);
+        this.userRepository.save( user );
+    }
+
+    @Override
+    public void deleteUser(UserDto userDto) throws Exception {
+        User user = Helper.parse(userDto);
+        this.userRepository.deleteById( user.getId() );
     }
 }
