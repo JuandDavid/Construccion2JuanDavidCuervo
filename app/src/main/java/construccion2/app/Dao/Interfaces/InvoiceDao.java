@@ -1,4 +1,4 @@
-package App.Dao.Interfaces;
+package app.Dao.Interfaces;
 
 import app.Dto.InvoiceDto;
 import java.util.List;

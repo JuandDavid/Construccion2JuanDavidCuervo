@@ -1,4 +1,4 @@
-package App.Service;
+package app.Service;
 
 import App.Dao.PersonDao;
 import App.Dao.UserDao;

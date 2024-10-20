@@ -1,7 +1,7 @@
 package construccion2.app.Controller;
 
 AdminProcessController
-package App.Controllers;
+package app.Controller;
 
 import App.Service.InvoiceService;
 import App.Service.LoginService;

@@ -1,4 +1,4 @@
-package App.Dao;
+package app.Dao;
 
 import App.Dto.PersonDto;
 import App.Helper.Helper;
@@ -6,7 +6,7 @@ import App.Model.Person;
 import App.Dao.Interfaces.PersonDaoInterface;
 import App.Dao.Repository.PersonRepository;
 import App.Dto.InvoiceDto;
-import App.Dto.UserDto;
+import pp.Dto.UserDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

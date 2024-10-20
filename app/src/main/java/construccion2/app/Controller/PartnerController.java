@@ -1,4 +1,4 @@
-package App.Controller;
+package app.Controller;
 
 import App.Dao.PartnerDao;
 import App.Dto.PartnerDto;

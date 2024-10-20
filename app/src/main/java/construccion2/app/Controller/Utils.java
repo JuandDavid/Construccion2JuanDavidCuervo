@@ -1,4 +1,4 @@
-package App.Controller;
+package app.Controller;
 
 import app.controller.validator.CommonsValidator;
 import java.util.Scanner;

@@ -1,4 +1,4 @@
-package App.Helper;
+package app.Helper;
 
 import App.Model.Person;
 import App.Model.User;

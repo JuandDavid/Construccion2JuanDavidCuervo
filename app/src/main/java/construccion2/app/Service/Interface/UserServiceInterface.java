@@ -1,4 +1,4 @@
-package App.Service.Intefaces;
+package app.Service.Intefaces;
 
 import App.Dto.UserDto;
 

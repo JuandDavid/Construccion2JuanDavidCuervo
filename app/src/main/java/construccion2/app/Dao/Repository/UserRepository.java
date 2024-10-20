@@ -1,4 +1,4 @@
-package App.Dao.Repository;
+package app.Dao.Repository;
 
 import App.Model.Person;
 import App.Model.User;

@@ -1,4 +1,4 @@
-package App.Controller;
+package app.Controller;
 
 import app.Dto.GuestDto;
 import app.Model.Member;

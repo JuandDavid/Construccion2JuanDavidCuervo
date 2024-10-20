@@ -1,4 +1,4 @@
-package App.Dto;
+package app.Dto;
 
 import java.sql.Date;
 import lombok.Getter;

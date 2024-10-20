@@ -1,4 +1,4 @@
-package App.Service;
+package app.Service;
 
 import java.sql.SQLException;
 import App.Service.Intefaces.UserServiceInterface;

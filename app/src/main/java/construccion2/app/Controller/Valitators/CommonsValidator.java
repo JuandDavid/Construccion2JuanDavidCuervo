@@ -1,4 +1,4 @@
-package App.Controller.Validator;
+package app.Controller.Validator;
 
 public abstract class CommonsValidator {
 	public void isValidString(String element, String value) throws Exception {

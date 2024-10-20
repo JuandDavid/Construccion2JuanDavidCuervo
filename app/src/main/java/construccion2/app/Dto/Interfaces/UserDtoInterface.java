@@ -1,4 +1,4 @@
-package App.Dto;
+package app.Dto;
 
 import app.Model.Person;
 import lombok.Getter;

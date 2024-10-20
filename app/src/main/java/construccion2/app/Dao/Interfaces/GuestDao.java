@@ -1,4 +1,4 @@
-package App.Dao.Interfaces;
+package app.Dao.Interfaces;
 
 import app.Dto.GuestDto;
 import app.Dto.UserDto;

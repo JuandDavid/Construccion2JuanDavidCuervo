@@ -1,4 +1,4 @@
-package App.Dao;
+package app.Dao;
 
 import App.Dao.Interfaces.UserDaoInteface;
 import App.Dao.Repository.UserRepository;

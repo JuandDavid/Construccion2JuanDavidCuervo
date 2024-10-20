@@ -1,4 +1,4 @@
-package App.Controller.Validator;
+package app.Controller.Validator;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package App.Dao.Interfaces;
+package app.Dao.Interfaces;
 import App.Dto.PersonDto;
 
 public interface PersonDaoInterface{

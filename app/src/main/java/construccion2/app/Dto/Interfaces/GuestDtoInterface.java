@@ -1,4 +1,4 @@
-package App.Dto.Interfaces;
+package app.Dto.Interfaces;
 
 public interface GuestDtoInterface {
 }

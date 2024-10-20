@@ -1,4 +1,4 @@
-package App.Controller;
+package app.Controller;
 
 import App.Dao.GuestDao;
 import App.Dao.PersonDao;

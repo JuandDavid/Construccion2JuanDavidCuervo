@@ -1,4 +1,4 @@
-package App.Dto;
+package app.Dto;
 
 import lombok.Getter;
 import lombok.Setter;

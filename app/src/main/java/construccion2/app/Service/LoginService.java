@@ -1,4 +1,4 @@
-package App.Service;
+package app.Service;
 
 import App.Service.Intefaces.LoginServiceInterface;
 import App.Dao.UserDao;

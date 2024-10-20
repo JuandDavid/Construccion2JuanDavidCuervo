@@ -1,4 +1,4 @@
-package App.Controller;
+package app.Controller;
 
 import App.Service.LoginService;
 import App.Service.PersonService;

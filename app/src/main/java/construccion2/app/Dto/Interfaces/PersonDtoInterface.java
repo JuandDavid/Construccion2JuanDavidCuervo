@@ -1,4 +1,4 @@
-package App.Dto;
+package app.Dto;
 
 import App.Controller.Validator.PersonValidator;
 
